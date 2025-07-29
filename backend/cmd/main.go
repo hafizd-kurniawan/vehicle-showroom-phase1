@@ -46,6 +46,8 @@ func main() {
 	vehicleRepo := repository.NewVehicleRepository(db)
 	transactionRepo := repository.NewTransactionRepository(db)
 	reportRepo := repository.NewReportRepository(db)
+	sparePartRepo := repository.NewSparePartRepository(db)
+	repairRepo := repository.NewRepairRepository(db)
 
 	// Initialize use cases
 	authUsecase := usecase.NewAuthUsecase(userRepo, sessionRepo, cfg.JWT)
@@ -53,6 +55,8 @@ func main() {
 	vehicleUsecase := usecase.NewVehicleUsecase(vehicleRepo, customerRepo)
 	transactionUsecase := usecase.NewTransactionUsecase(transactionRepo, vehicleRepo, customerRepo)
 	reportUsecase := usecase.NewReportUsecase(reportRepo)
+	sparePartUsecase := usecase.NewSparePartUsecase(sparePartRepo)
+	repairUsecase := usecase.NewRepairUsecase(repairRepo, vehicleRepo, sparePartRepo)
 
 	// Initialize HTTP handlers
 	authHandler := http.NewAuthHandler(authUsecase)
@@ -60,6 +64,8 @@ func main() {
 	vehicleHandler := http.NewVehicleHandler(vehicleUsecase)
 	transactionHandler := http.NewTransactionHandler(transactionUsecase)
 	reportHandler := http.NewReportHandler(reportUsecase)
+	sparePartHandler := http.NewSparePartHandler(sparePartUsecase)
+	repairHandler := http.NewRepairHandler(repairUsecase)
 
 	// Initialize Middleware
 	authMiddleware := http.AuthMiddleware(authUsecase)
@@ -146,6 +152,28 @@ func main() {
 				reports.GET("/profitability", reportHandler.GetVehicleProfitability)
 				reports.GET("/sales", reportHandler.GetSalesReport)
 				reports.GET("/purchases", reportHandler.GetPurchaseReport)
+			}
+
+			spareParts := protected.Group("/spare-parts")
+			spareParts.Use(http.RoleMiddleware("admin", "mechanic"))
+			{
+				spareParts.GET("", sparePartHandler.List)
+				spareParts.POST("", sparePartHandler.Create)
+				spareParts.GET("/:id", sparePartHandler.GetByID)
+				spareParts.PUT("/:id", sparePartHandler.Update)
+				spareParts.DELETE("/:id", http.RoleMiddleware("admin"), sparePartHandler.Delete)
+			}
+
+			repairs := protected.Group("/repairs")
+			repairs.Use(http.RoleMiddleware("admin", "mechanic"))
+			{
+				repairs.GET("", repairHandler.List)
+				repairs.POST("", repairHandler.Create)
+				repairs.GET("/:id", repairHandler.GetByID)
+				repairs.PUT("/:id", repairHandler.Update)
+				repairs.PUT("/:id/status", repairHandler.UpdateStatus)
+				repairs.POST("/:id/parts", repairHandler.AddPart)
+				repairs.DELETE("/:id/parts/:partId", repairHandler.RemovePart)
 			}
 		}
 	}
