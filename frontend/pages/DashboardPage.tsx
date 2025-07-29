@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,15 +11,41 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
-import { Car, Users, Receipt, Wrench, LogOut, User, Plus } from 'lucide-react';
+import { Car, Users, Receipt, Wrench, LogOut, Plus, TrendingUp, TrendingDown, DollarSign, BarChart3 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { transactionService, DashboardStats } from '../services/transactionService';
 
 export default function DashboardPage() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadDashboardStats();
+  }, []);
+
+  const loadDashboardStats = async () => {
+    try {
+      const dashboardStats = await transactionService.getDashboardStats();
+      setStats(dashboardStats);
+    } catch (error) {
+      console.error('Failed to load dashboard stats:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogout = async () => {
     await logout();
+  };
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+    }).format(price);
   };
 
   const dashboardCards = [
@@ -41,11 +67,11 @@ export default function DashboardPage() {
     },
     {
       title: 'Transactions',
-      subtitle: 'Coming in Phase 3',
+      subtitle: 'Purchase & Sales transactions',
       icon: Receipt,
       color: 'text-orange-600',
       bgColor: 'bg-orange-50',
-      onClick: () => {},
+      onClick: () => navigate('/transactions'),
     },
     {
       title: 'Repairs',
@@ -107,9 +133,71 @@ export default function DashboardPage() {
             Welcome to Vehicle Showroom Management System
           </h2>
           <p className="text-lg text-green-600 font-semibold">
-            Phase 2: Customer & Vehicle Management - Completed ✅
+            Phase 3: Transaction System - Completed ✅
           </p>
         </div>
+
+        {/* Statistics Cards */}
+        {loading ? (
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-2 text-gray-500">Loading dashboard...</p>
+          </div>
+        ) : stats && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Vehicles</CardTitle>
+                <Car className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.total_vehicles}</div>
+                <p className="text-xs text-muted-foreground">
+                  {stats.vehicles_for_sale} ready to sell
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Customers</CardTitle>
+                <Users className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.total_customers}</div>
+                <p className="text-xs text-muted-foreground">
+                  Active customers
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Today's Revenue</CardTitle>
+                <DollarSign className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{formatPrice(stats.today_revenue)}</div>
+                <p className="text-xs text-muted-foreground">
+                  {stats.today_sales} sales today
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Profit</CardTitle>
+                <BarChart3 className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{formatPrice(stats.total_profit)}</div>
+                <p className="text-xs text-muted-foreground">
+                  All time profit
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* Quick Actions */}
         <div className="mb-8">
@@ -122,6 +210,14 @@ export default function DashboardPage() {
             <Button onClick={() => navigate('/customers/new')} variant="outline" className="flex items-center gap-2">
               <Plus className="h-4 w-4" />
               Add Customer
+            </Button>
+            <Button onClick={() => navigate('/transactions/purchase/new')} variant="outline" className="flex items-center gap-2">
+              <TrendingDown className="h-4 w-4" />
+              New Purchase
+            </Button>
+            <Button onClick={() => navigate('/transactions/sales/new')} className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4" />
+              New Sale
             </Button>
           </div>
         </div>
@@ -172,11 +268,11 @@ export default function DashboardPage() {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Phase 3: Transaction System</span>
-                <span className="text-sm text-yellow-600 font-semibold">🚧 Next</span>
+                <span className="text-sm text-green-600 font-semibold">✅ Completed</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Phase 4: Repair & Parts Management</span>
-                <span className="text-sm text-gray-500">⏳ Planned</span>
+                <span className="text-sm text-yellow-600 font-semibold">🚧 Next</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Phase 5: Reporting & Dashboard</span>

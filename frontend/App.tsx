@@ -7,6 +7,9 @@ import CustomersPage from './pages/CustomersPage';
 import CustomerFormPage from './pages/CustomerFormPage';
 import VehiclesPage from './pages/VehiclesPage';
 import VehicleFormPage from './pages/VehicleFormPage';
+import TransactionsPage from './pages/TransactionsPage';
+import PurchaseFormPage from './pages/PurchaseFormPage';
+import SalesFormPage from './pages/SalesFormPage';
 import { Toaster } from '@/components/ui/toaster';
 
 function AppRoutes() {
@@ -53,6 +56,18 @@ function AppRoutes() {
       <Route 
         path="/vehicles/:id/edit" 
         element={user ? <VehicleFormPage /> : <Navigate to="/login" replace />} 
+      />
+      <Route 
+        path="/transactions" 
+        element={user ? <TransactionsPage /> : <Navigate to="/login" replace />} 
+      />
+      <Route 
+        path="/transactions/purchase/new" 
+        element={user ? <PurchaseFormPage /> : <Navigate to="/login" replace />} 
+      />
+      <Route 
+        path="/transactions/sales/new" 
+        element={user ? <SalesFormPage /> : <Navigate to="/login" replace />} 
       />
       <Route 
         path="/" 

@@ -44,16 +44,19 @@ func main() {
   sessionRepo := repository.NewSessionRepository(db)
   customerRepo := repository.NewCustomerRepository(db)
   vehicleRepo := repository.NewVehicleRepository(db)
+  transactionRepo := repository.NewTransactionRepository(db)
 
   // Initialize use cases
   authUsecase := usecase.NewAuthUsecase(userRepo, sessionRepo, cfg.JWT)
   customerUsecase := usecase.NewCustomerUsecase(customerRepo)
   vehicleUsecase := usecase.NewVehicleUsecase(vehicleRepo, customerRepo)
+  transactionUsecase := usecase.NewTransactionUsecase(transactionRepo, vehicleRepo, customerRepo)
 
   // Initialize HTTP handlers
   authHandler := http.NewAuthHandler(authUsecase)
   customerHandler := http.NewCustomerHandler(customerUsecase)
   vehicleHandler := http.NewVehicleHandler(vehicleUsecase)
+  transactionHandler := http.NewTransactionHandler(transactionUsecase)
 
   // Setup router
   router := gin.Default()
@@ -100,6 +103,28 @@ func main() {
       vehicles.PUT("/:id", vehicleHandler.Update)
       vehicles.DELETE("/:id", vehicleHandler.Delete)
       vehicles.PUT("/:id/status", vehicleHandler.UpdateStatus)
+    }
+
+    transactions := api.Group("/transactions")
+    {
+      purchases := transactions.Group("/purchases")
+      {
+        purchases.GET("", transactionHandler.ListPurchases)
+        purchases.POST("", transactionHandler.CreatePurchase)
+        purchases.GET("/:id", transactionHandler.GetPurchaseByID)
+      }
+
+      sales := transactions.Group("/sales")
+      {
+        sales.GET("", transactionHandler.ListSales)
+        sales.POST("", transactionHandler.CreateSales)
+        sales.GET("/:id", transactionHandler.GetSalesByID)
+      }
+    }
+
+    dashboard := api.Group("/dashboard")
+    {
+      dashboard.GET("/stats", transactionHandler.GetDashboardStats)
     }
   }
 
