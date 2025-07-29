@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
-import { Car, Users, Receipt, Wrench, LogOut, Plus, TrendingUp, TrendingDown, DollarSign, BarChart3 } from 'lucide-react';
+import { Car, Users, Receipt, Wrench, LogOut, Plus, TrendingUp, TrendingDown, DollarSign, BarChart3, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { transactionService, DashboardStats } from '../services/transactionService';
 
@@ -25,6 +25,7 @@ export default function DashboardPage() {
   const canCreateCustomer = user?.role === 'admin' || user?.role === 'cashier';
   const canCreateTransaction = user?.role === 'admin' || user?.role === 'cashier';
   const canViewDashboardStats = user?.role === 'admin';
+  const canViewReports = user?.role === 'admin';
 
   useEffect(() => {
     if (canViewDashboardStats) {
@@ -65,6 +66,7 @@ export default function DashboardPage() {
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
       onClick: () => navigate('/vehicles'),
+      visible: true,
     },
     {
       title: 'Customers',
@@ -73,22 +75,34 @@ export default function DashboardPage() {
       color: 'text-green-600',
       bgColor: 'bg-green-50',
       onClick: () => navigate('/customers'),
+      visible: true,
     },
     {
       title: 'Transactions',
-      subtitle: 'Purchase & Sales transactions',
+      subtitle: 'Purchase & Sales',
       icon: Receipt,
       color: 'text-orange-600',
       bgColor: 'bg-orange-50',
       onClick: () => navigate('/transactions'),
+      visible: canCreateTransaction,
     },
     {
       title: 'Repairs',
-      subtitle: 'Coming in Phase 4',
+      subtitle: 'Coming Soon',
       icon: Wrench,
       color: 'text-purple-600',
       bgColor: 'bg-purple-50',
       onClick: () => {},
+      visible: user?.role === 'admin' || user?.role === 'mechanic',
+    },
+    {
+      title: 'Reports',
+      subtitle: 'Analytics & Insights',
+      icon: FileText,
+      color: 'text-red-600',
+      bgColor: 'bg-red-50',
+      onClick: () => navigate('/reports'),
+      visible: canViewReports,
     },
   ];
 
@@ -142,7 +156,7 @@ export default function DashboardPage() {
             Welcome, {user?.full_name}!
           </h2>
           <p className="text-lg text-green-600 font-semibold">
-            Phase 4: Repair & Parts Management - In Progress...
+            Phase 5: Reporting & Analytics - Completed ✅
           </p>
         </div>
 
@@ -243,7 +257,7 @@ export default function DashboardPage() {
 
         {/* Dashboard Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {dashboardCards.map((card, index) => {
+          {dashboardCards.filter(card => card.visible).map((card, index) => {
             const IconComponent = card.icon;
             return (
               <Card 

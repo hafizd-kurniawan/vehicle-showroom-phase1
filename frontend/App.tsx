@@ -10,6 +10,7 @@ import VehicleFormPage from './pages/VehicleFormPage';
 import TransactionsPage from './pages/TransactionsPage';
 import PurchaseFormPage from './pages/PurchaseFormPage';
 import SalesFormPage from './pages/SalesFormPage';
+import ReportsPage from './pages/ReportsPage';
 import { Toaster } from '@/components/ui/toaster';
 
 function AppRoutes() {
@@ -68,6 +69,10 @@ function AppRoutes() {
       <Route 
         path="/transactions/sales/new" 
         element={user ? <SalesFormPage /> : <Navigate to="/login" replace />} 
+      />
+      <Route 
+        path="/reports" 
+        element={user && user.role === 'admin' ? <ReportsPage /> : <Navigate to="/dashboard" replace />} 
       />
       <Route 
         path="/" 

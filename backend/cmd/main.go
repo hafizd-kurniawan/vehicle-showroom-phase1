@@ -45,18 +45,21 @@ func main() {
 	customerRepo := repository.NewCustomerRepository(db)
 	vehicleRepo := repository.NewVehicleRepository(db)
 	transactionRepo := repository.NewTransactionRepository(db)
+	reportRepo := repository.NewReportRepository(db)
 
 	// Initialize use cases
 	authUsecase := usecase.NewAuthUsecase(userRepo, sessionRepo, cfg.JWT)
 	customerUsecase := usecase.NewCustomerUsecase(customerRepo)
 	vehicleUsecase := usecase.NewVehicleUsecase(vehicleRepo, customerRepo)
 	transactionUsecase := usecase.NewTransactionUsecase(transactionRepo, vehicleRepo, customerRepo)
+	reportUsecase := usecase.NewReportUsecase(reportRepo)
 
 	// Initialize HTTP handlers
 	authHandler := http.NewAuthHandler(authUsecase)
 	customerHandler := http.NewCustomerHandler(customerUsecase)
 	vehicleHandler := http.NewVehicleHandler(vehicleUsecase)
 	transactionHandler := http.NewTransactionHandler(transactionUsecase)
+	reportHandler := http.NewReportHandler(reportUsecase)
 
 	// Initialize Middleware
 	authMiddleware := http.AuthMiddleware(authUsecase)
@@ -84,7 +87,6 @@ func main() {
 		auth := api.Group("/auth")
 		{
 			auth.POST("/login", authHandler.Login)
-			// In a real production app, registration should be restricted
 			auth.POST("/register", authHandler.Register)
 			auth.POST("/logout", authMiddleware, authHandler.Logout)
 			auth.GET("/me", authMiddleware, authHandler.GetProfile)
@@ -136,6 +138,14 @@ func main() {
 			dashboard.Use(http.RoleMiddleware("admin"))
 			{
 				dashboard.GET("/stats", transactionHandler.GetDashboardStats)
+			}
+
+			reports := protected.Group("/reports")
+			reports.Use(http.RoleMiddleware("admin"))
+			{
+				reports.GET("/profitability", reportHandler.GetVehicleProfitability)
+				reports.GET("/sales", reportHandler.GetSalesReport)
+				reports.GET("/purchases", reportHandler.GetPurchaseReport)
 			}
 		}
 	}
