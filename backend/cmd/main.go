@@ -34,15 +34,26 @@ func main() {
     log.Fatal("Failed to run migrations:", err)
   }
 
+  // Seed demo data
+  if err := database.SeedDemoData(db); err != nil {
+    log.Fatal("Failed to seed demo data:", err)
+  }
+
   // Initialize repositories
   userRepo := repository.NewUserRepository(db)
   sessionRepo := repository.NewSessionRepository(db)
+  customerRepo := repository.NewCustomerRepository(db)
+  vehicleRepo := repository.NewVehicleRepository(db)
 
   // Initialize use cases
   authUsecase := usecase.NewAuthUsecase(userRepo, sessionRepo, cfg.JWT)
+  customerUsecase := usecase.NewCustomerUsecase(customerRepo)
+  vehicleUsecase := usecase.NewVehicleUsecase(vehicleRepo, customerRepo)
 
   // Initialize HTTP handlers
   authHandler := http.NewAuthHandler(authUsecase)
+  customerHandler := http.NewCustomerHandler(customerUsecase)
+  vehicleHandler := http.NewVehicleHandler(vehicleUsecase)
 
   // Setup router
   router := gin.Default()
@@ -70,6 +81,25 @@ func main() {
       auth.POST("/register", authHandler.Register)
       auth.POST("/logout", authHandler.Logout)
       auth.GET("/me", authHandler.GetProfile)
+    }
+
+    customers := api.Group("/customers")
+    {
+      customers.GET("", customerHandler.List)
+      customers.POST("", customerHandler.Create)
+      customers.GET("/:id", customerHandler.GetByID)
+      customers.PUT("/:id", customerHandler.Update)
+      customers.DELETE("/:id", customerHandler.Delete)
+    }
+
+    vehicles := api.Group("/vehicles")
+    {
+      vehicles.GET("", vehicleHandler.List)
+      vehicles.POST("", vehicleHandler.Create)
+      vehicles.GET("/:id", vehicleHandler.GetByID)
+      vehicles.PUT("/:id", vehicleHandler.Update)
+      vehicles.DELETE("/:id", vehicleHandler.Delete)
+      vehicles.PUT("/:id/status", vehicleHandler.UpdateStatus)
     }
   }
 

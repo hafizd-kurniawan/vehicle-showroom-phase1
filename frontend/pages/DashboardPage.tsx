@@ -11,10 +11,12 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
-import { Car, Users, Receipt, Wrench, LogOut, User } from 'lucide-react';
+import { Car, Users, Receipt, Wrench, LogOut, User, Plus } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function DashboardPage() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   const handleLogout = async () => {
     await logout();
@@ -23,17 +25,19 @@ export default function DashboardPage() {
   const dashboardCards = [
     {
       title: 'Vehicles',
-      subtitle: 'Coming in Phase 2',
+      subtitle: 'Manage vehicle inventory',
       icon: Car,
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
+      onClick: () => navigate('/vehicles'),
     },
     {
       title: 'Customers',
-      subtitle: 'Coming in Phase 2',
+      subtitle: 'Manage customer database',
       icon: Users,
       color: 'text-green-600',
       bgColor: 'bg-green-50',
+      onClick: () => navigate('/customers'),
     },
     {
       title: 'Transactions',
@@ -41,6 +45,7 @@ export default function DashboardPage() {
       icon: Receipt,
       color: 'text-orange-600',
       bgColor: 'bg-orange-50',
+      onClick: () => {},
     },
     {
       title: 'Repairs',
@@ -48,6 +53,7 @@ export default function DashboardPage() {
       icon: Wrench,
       color: 'text-purple-600',
       bgColor: 'bg-purple-50',
+      onClick: () => {},
     },
   ];
 
@@ -101,8 +107,23 @@ export default function DashboardPage() {
             Welcome to Vehicle Showroom Management System
           </h2>
           <p className="text-lg text-green-600 font-semibold">
-            Phase 1: Authentication & Foundation - Completed ✅
+            Phase 2: Customer & Vehicle Management - Completed ✅
           </p>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="mb-8">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+          <div className="flex gap-4">
+            <Button onClick={() => navigate('/vehicles/new')} className="flex items-center gap-2">
+              <Plus className="h-4 w-4" />
+              Add Vehicle
+            </Button>
+            <Button onClick={() => navigate('/customers/new')} variant="outline" className="flex items-center gap-2">
+              <Plus className="h-4 w-4" />
+              Add Customer
+            </Button>
+          </div>
         </div>
 
         {/* Dashboard Cards */}
@@ -110,7 +131,11 @@ export default function DashboardPage() {
           {dashboardCards.map((card, index) => {
             const IconComponent = card.icon;
             return (
-              <Card key={index} className="hover:shadow-lg transition-shadow">
+              <Card 
+                key={index} 
+                className="hover:shadow-lg transition-shadow cursor-pointer"
+                onClick={card.onClick}
+              >
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">
                     {card.title}
@@ -143,11 +168,11 @@ export default function DashboardPage() {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Phase 2: Customer & Vehicle Management</span>
-                <span className="text-sm text-yellow-600 font-semibold">🚧 Next</span>
+                <span className="text-sm text-green-600 font-semibold">✅ Completed</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Phase 3: Transaction System</span>
-                <span className="text-sm text-gray-500">⏳ Planned</span>
+                <span className="text-sm text-yellow-600 font-semibold">🚧 Next</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Phase 4: Repair & Parts Management</span>

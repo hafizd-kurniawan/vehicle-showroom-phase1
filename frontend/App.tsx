@@ -3,6 +3,10 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
+import CustomersPage from './pages/CustomersPage';
+import CustomerFormPage from './pages/CustomerFormPage';
+import VehiclesPage from './pages/VehiclesPage';
+import VehicleFormPage from './pages/VehicleFormPage';
 import { Toaster } from '@/components/ui/toaster';
 
 function AppRoutes() {
@@ -25,6 +29,30 @@ function AppRoutes() {
       <Route 
         path="/dashboard" 
         element={user ? <DashboardPage /> : <Navigate to="/login" replace />} 
+      />
+      <Route 
+        path="/customers" 
+        element={user ? <CustomersPage /> : <Navigate to="/login" replace />} 
+      />
+      <Route 
+        path="/customers/new" 
+        element={user ? <CustomerFormPage /> : <Navigate to="/login" replace />} 
+      />
+      <Route 
+        path="/customers/:id/edit" 
+        element={user ? <CustomerFormPage /> : <Navigate to="/login" replace />} 
+      />
+      <Route 
+        path="/vehicles" 
+        element={user ? <VehiclesPage /> : <Navigate to="/login" replace />} 
+      />
+      <Route 
+        path="/vehicles/new" 
+        element={user ? <VehicleFormPage /> : <Navigate to="/login" replace />} 
+      />
+      <Route 
+        path="/vehicles/:id/edit" 
+        element={user ? <VehicleFormPage /> : <Navigate to="/login" replace />} 
       />
       <Route 
         path="/" 
