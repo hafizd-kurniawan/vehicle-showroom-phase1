@@ -21,9 +21,18 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const canCreateVehicle = user?.role === 'admin' || user?.role === 'cashier';
+  const canCreateCustomer = user?.role === 'admin' || user?.role === 'cashier';
+  const canCreateTransaction = user?.role === 'admin' || user?.role === 'cashier';
+  const canViewDashboardStats = user?.role === 'admin';
+
   useEffect(() => {
-    loadDashboardStats();
-  }, []);
+    if (canViewDashboardStats) {
+      loadDashboardStats();
+    } else {
+      setLoading(false);
+    }
+  }, [canViewDashboardStats]);
 
   const loadDashboardStats = async () => {
     try {
@@ -130,95 +139,105 @@ export default function DashboardPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-2">
-            Welcome to Vehicle Showroom Management System
+            Welcome, {user?.full_name}!
           </h2>
           <p className="text-lg text-green-600 font-semibold">
-            Phase 3: Transaction System - Completed ✅
+            Phase 4: Repair & Parts Management - In Progress...
           </p>
         </div>
 
         {/* Statistics Cards */}
-        {loading ? (
-          <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-2 text-gray-500">Loading dashboard...</p>
-          </div>
-        ) : stats && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Vehicles</CardTitle>
-                <Car className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.total_vehicles}</div>
-                <p className="text-xs text-muted-foreground">
-                  {stats.vehicles_for_sale} ready to sell
-                </p>
-              </CardContent>
-            </Card>
+        {canViewDashboardStats && (
+          loading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+              <p className="mt-2 text-gray-500">Loading dashboard...</p>
+            </div>
+          ) : stats && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total Vehicles</CardTitle>
+                  <Car className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stats.total_vehicles}</div>
+                  <p className="text-xs text-muted-foreground">
+                    {stats.vehicles_for_sale} ready to sell
+                  </p>
+                </CardContent>
+              </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Customers</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.total_customers}</div>
-                <p className="text-xs text-muted-foreground">
-                  Active customers
-                </p>
-              </CardContent>
-            </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total Customers</CardTitle>
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stats.total_customers}</div>
+                  <p className="text-xs text-muted-foreground">
+                    Active customers
+                  </p>
+                </CardContent>
+              </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Today's Revenue</CardTitle>
-                <DollarSign className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{formatPrice(stats.today_revenue)}</div>
-                <p className="text-xs text-muted-foreground">
-                  {stats.today_sales} sales today
-                </p>
-              </CardContent>
-            </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Today's Revenue</CardTitle>
+                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{formatPrice(stats.today_revenue)}</div>
+                  <p className="text-xs text-muted-foreground">
+                    {stats.today_sales} sales today
+                  </p>
+                </CardContent>
+              </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Profit</CardTitle>
-                <BarChart3 className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{formatPrice(stats.total_profit)}</div>
-                <p className="text-xs text-muted-foreground">
-                  All time profit
-                </p>
-              </CardContent>
-            </Card>
-          </div>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total Profit</CardTitle>
+                  <BarChart3 className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{formatPrice(stats.total_profit)}</div>
+                  <p className="text-xs text-muted-foreground">
+                    All time profit
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          )
         )}
 
         {/* Quick Actions */}
         <div className="mb-8">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-          <div className="flex gap-4">
-            <Button onClick={() => navigate('/vehicles/new')} className="flex items-center gap-2">
-              <Plus className="h-4 w-4" />
-              Add Vehicle
-            </Button>
-            <Button onClick={() => navigate('/customers/new')} variant="outline" className="flex items-center gap-2">
-              <Plus className="h-4 w-4" />
-              Add Customer
-            </Button>
-            <Button onClick={() => navigate('/transactions/purchase/new')} variant="outline" className="flex items-center gap-2">
-              <TrendingDown className="h-4 w-4" />
-              New Purchase
-            </Button>
-            <Button onClick={() => navigate('/transactions/sales/new')} className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4" />
-              New Sale
-            </Button>
+          <div className="flex flex-wrap gap-4">
+            {canCreateVehicle && (
+              <Button onClick={() => navigate('/vehicles/new')} className="flex items-center gap-2">
+                <Plus className="h-4 w-4" />
+                Add Vehicle
+              </Button>
+            )}
+            {canCreateCustomer && (
+              <Button onClick={() => navigate('/customers/new')} variant="outline" className="flex items-center gap-2">
+                <Plus className="h-4 w-4" />
+                Add Customer
+              </Button>
+            )}
+            {canCreateTransaction && (
+              <Button onClick={() => navigate('/transactions/purchase/new')} variant="outline" className="flex items-center gap-2">
+                <TrendingDown className="h-4 w-4" />
+                New Purchase
+              </Button>
+            )}
+            {canCreateTransaction && (
+              <Button onClick={() => navigate('/transactions/sales/new')} className="flex items-center gap-2">
+                <TrendingUp className="h-4 w-4" />
+                New Sale
+              </Button>
+            )}
           </div>
         </div>
 
@@ -249,38 +268,6 @@ export default function DashboardPage() {
             );
           })}
         </div>
-
-        {/* Status Card */}
-        <Card className="mt-8">
-          <CardHeader>
-            <CardTitle>Development Status</CardTitle>
-            <CardDescription>Current implementation progress</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Phase 1: Foundation & Authentication</span>
-                <span className="text-sm text-green-600 font-semibold">✅ Completed</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Phase 2: Customer & Vehicle Management</span>
-                <span className="text-sm text-green-600 font-semibold">✅ Completed</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Phase 3: Transaction System</span>
-                <span className="text-sm text-green-600 font-semibold">✅ Completed</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Phase 4: Repair & Parts Management</span>
-                <span className="text-sm text-yellow-600 font-semibold">🚧 Next</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Phase 5: Reporting & Dashboard</span>
-                <span className="text-sm text-gray-500">⏳ Planned</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </main>
     </div>
   );

@@ -5,9 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/components/ui/use-toast';
-import { Search, Plus, ArrowLeft, Receipt, TrendingUp, TrendingDown, Eye } from 'lucide-react';
+import { Search, Plus, ArrowLeft, TrendingUp, TrendingDown, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { transactionService, PurchaseTransaction, SalesTransaction } from '../services/transactionService';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function TransactionsPage() {
   const [purchases, setPurchases] = useState<PurchaseTransaction[]>([]);
@@ -22,7 +23,9 @@ export default function TransactionsPage() {
   const [salesTotal, setSalesTotal] = useState(0);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
 
+  const canCreateTransaction = user?.role === 'admin' || user?.role === 'cashier';
   const limit = 10;
 
   useEffect(() => {
@@ -118,16 +121,18 @@ export default function TransactionsPage() {
                 Transaction Management
               </h1>
             </div>
-            <div className="flex gap-2">
-              <Button onClick={() => navigate('/transactions/purchase/new')} variant="outline">
-                <TrendingDown className="h-4 w-4 mr-2" />
-                New Purchase
-              </Button>
-              <Button onClick={() => navigate('/transactions/sales/new')}>
-                <TrendingUp className="h-4 w-4 mr-2" />
-                New Sale
-              </Button>
-            </div>
+            {canCreateTransaction && (
+              <div className="flex gap-2">
+                <Button onClick={() => navigate('/transactions/purchase/new')} variant="outline">
+                  <TrendingDown className="h-4 w-4 mr-2" />
+                  New Purchase
+                </Button>
+                <Button onClick={() => navigate('/transactions/sales/new')}>
+                  <TrendingUp className="h-4 w-4 mr-2" />
+                  New Sale
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </header>
@@ -172,13 +177,15 @@ export default function TransactionsPage() {
                 <Card>
                   <CardContent className="text-center py-8">
                     <p className="text-gray-500">No purchase transactions found</p>
-                    <Button 
-                      onClick={() => navigate('/transactions/purchase/new')}
-                      className="mt-4"
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Create First Purchase
-                    </Button>
+                    {canCreateTransaction && (
+                      <Button 
+                        onClick={() => navigate('/transactions/purchase/new')}
+                        className="mt-4"
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Create First Purchase
+                      </Button>
+                    )}
                   </CardContent>
                 </Card>
               ) : (
@@ -246,7 +253,7 @@ export default function TransactionsPage() {
 
             {/* Purchase Pagination */}
             {purchaseTotalPages > 1 && (
-              <div className="flex justify-center gap-2">
+              <div className="flex justify-center gap-2 mt-8">
                 <Button
                   variant="outline"
                   onClick={() => setPurchasePage(purchasePage - 1)}
@@ -300,13 +307,15 @@ export default function TransactionsPage() {
                 <Card>
                   <CardContent className="text-center py-8">
                     <p className="text-gray-500">No sales transactions found</p>
-                    <Button 
-                      onClick={() => navigate('/transactions/sales/new')}
-                      className="mt-4"
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Create First Sale
-                    </Button>
+                    {canCreateTransaction && (
+                      <Button 
+                        onClick={() => navigate('/transactions/sales/new')}
+                        className="mt-4"
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Create First Sale
+                      </Button>
+                    )}
                   </CardContent>
                 </Card>
               ) : (
@@ -374,7 +383,7 @@ export default function TransactionsPage() {
 
             {/* Sales Pagination */}
             {salesTotalPages > 1 && (
-              <div className="flex justify-center gap-2">
+              <div className="flex justify-center gap-2 mt-8">
                 <Button
                   variant="outline"
                   onClick={() => setSalesPage(salesPage - 1)}

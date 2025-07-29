@@ -7,6 +7,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { Search, Plus, Edit, Trash2, ArrowLeft, Phone, Mail, MapPin, CreditCard } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { customerService, Customer } from '../services/customerService';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function CustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -16,6 +17,11 @@ export default function CustomersPage() {
   const [total, setTotal] = useState(0);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
+
+  const canCreate = user?.role === 'admin' || user?.role === 'cashier';
+  const canEdit = user?.role === 'admin' || user?.role === 'cashier';
+  const canDelete = user?.role === 'admin';
 
   const limit = 10;
 
@@ -88,10 +94,12 @@ export default function CustomersPage() {
                 Customer Management
               </h1>
             </div>
-            <Button onClick={() => navigate('/customers/new')}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Customer
-            </Button>
+            {canCreate && (
+              <Button onClick={() => navigate('/customers/new')}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Customer
+              </Button>
+            )}
           </div>
         </div>
       </header>
@@ -130,13 +138,15 @@ export default function CustomersPage() {
             <Card>
               <CardContent className="text-center py-8">
                 <p className="text-gray-500">No customers found</p>
-                <Button 
-                  onClick={() => navigate('/customers/new')}
-                  className="mt-4"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add First Customer
-                </Button>
+                {canCreate && (
+                  <Button 
+                    onClick={() => navigate('/customers/new')}
+                    className="mt-4"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add First Customer
+                  </Button>
+                )}
               </CardContent>
             </Card>
           ) : (
@@ -182,21 +192,25 @@ export default function CustomersPage() {
                     </div>
                     
                     <div className="flex gap-2 ml-4">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => navigate(`/customers/${customer.id}/edit`)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDelete(customer.id)}
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      {canEdit && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => navigate(`/customers/${customer.id}/edit`)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      )}
+                      {canDelete && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDelete(customer.id)}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </CardContent>

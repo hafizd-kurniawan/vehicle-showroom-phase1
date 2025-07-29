@@ -8,6 +8,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { Search, Plus, Edit, Trash2, ArrowLeft, Car, Calendar, Gauge, Fuel, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { vehicleService, Vehicle } from '../services/vehicleService';
+import { useAuth } from '../contexts/AuthContext';
 
 const statusColors = {
   purchased: 'bg-blue-100 text-blue-800',
@@ -34,6 +35,12 @@ export default function VehiclesPage() {
   const [total, setTotal] = useState(0);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
+
+  const canCreate = user?.role === 'admin' || user?.role === 'cashier';
+  const canEdit = user?.role === 'admin' || user?.role === 'cashier' || user?.role === 'mechanic';
+  const canDelete = user?.role === 'admin';
+  const canChangeStatus = user?.role === 'admin' || user?.role === 'cashier' || user?.role === 'mechanic';
 
   const limit = 10;
 
@@ -138,10 +145,12 @@ export default function VehiclesPage() {
                 Vehicle Management
               </h1>
             </div>
-            <Button onClick={() => navigate('/vehicles/new')}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Vehicle
-            </Button>
+            {canCreate && (
+              <Button onClick={() => navigate('/vehicles/new')}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Vehicle
+              </Button>
+            )}
           </div>
         </div>
       </header>
@@ -193,13 +202,15 @@ export default function VehiclesPage() {
             <Card>
               <CardContent className="text-center py-8">
                 <p className="text-gray-500">No vehicles found</p>
-                <Button 
-                  onClick={() => navigate('/vehicles/new')}
-                  className="mt-4"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add First Vehicle
-                </Button>
+                {canCreate && (
+                  <Button 
+                    onClick={() => navigate('/vehicles/new')}
+                    className="mt-4"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add First Vehicle
+                  </Button>
+                )}
               </CardContent>
             </Card>
           ) : (
@@ -273,38 +284,44 @@ export default function VehiclesPage() {
                     
                     <div className="flex flex-col gap-2 ml-4">
                       {/* Status Change */}
-                      <Select
-                        value={vehicle.status}
-                        onValueChange={(value) => handleStatusChange(vehicle.id, value)}
-                      >
-                        <SelectTrigger className="w-40">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="purchased">Purchased</SelectItem>
-                          <SelectItem value="in_repair">In Repair</SelectItem>
-                          <SelectItem value="ready_to_sell">Ready to Sell</SelectItem>
-                          <SelectItem value="reserved">Reserved</SelectItem>
-                          <SelectItem value="sold">Sold</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      {canChangeStatus && (
+                        <Select
+                          value={vehicle.status}
+                          onValueChange={(value) => handleStatusChange(vehicle.id, value)}
+                        >
+                          <SelectTrigger className="w-40">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="purchased">Purchased</SelectItem>
+                            <SelectItem value="in_repair">In Repair</SelectItem>
+                            <SelectItem value="ready_to_sell">Ready to Sell</SelectItem>
+                            <SelectItem value="reserved">Reserved</SelectItem>
+                            <SelectItem value="sold">Sold</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      )}
 
                       <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => navigate(`/vehicles/${vehicle.id}/edit`)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDelete(vehicle.id)}
-                          className="text-red-600 hover:text-red-700"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        {canEdit && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => navigate(`/vehicles/${vehicle.id}/edit`)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        )}
+                        {canDelete && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDelete(vehicle.id)}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
                       </div>
                     </div>
                   </div>
