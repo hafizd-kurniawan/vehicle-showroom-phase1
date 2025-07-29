@@ -26,6 +26,7 @@ export default function DashboardPage() {
   const canCreateTransaction = user?.role === 'admin' || user?.role === 'cashier';
   const canViewDashboardStats = user?.role === 'admin';
   const canViewReports = user?.role === 'admin';
+  const canAccessRepairs = user?.role === 'admin' || user?.role === 'mechanic';
 
   useEffect(() => {
     if (canViewDashboardStats) {
@@ -87,13 +88,13 @@ export default function DashboardPage() {
       visible: canCreateTransaction,
     },
     {
-      title: 'Repairs',
-      subtitle: 'Coming Soon',
+      title: 'Repairs & Parts',
+      subtitle: 'Workshop Management',
       icon: Wrench,
       color: 'text-purple-600',
       bgColor: 'bg-purple-50',
-      onClick: () => {},
-      visible: user?.role === 'admin' || user?.role === 'mechanic',
+      onClick: () => navigate('/repairs'),
+      visible: canAccessRepairs,
     },
     {
       title: 'Reports',
@@ -156,7 +157,7 @@ export default function DashboardPage() {
             Welcome, {user?.full_name}!
           </h2>
           <p className="text-lg text-green-600 font-semibold">
-            Phase 5: Reporting & Analytics - Completed ✅
+            🎉 Phase 6: Repair & Parts Management - COMPLETED! ✅
           </p>
         </div>
 
@@ -250,6 +251,12 @@ export default function DashboardPage() {
               <Button onClick={() => navigate('/transactions/sales/new')} className="flex items-center gap-2">
                 <TrendingUp className="h-4 w-4" />
                 New Sale
+              </Button>
+            )}
+            {canAccessRepairs && (
+              <Button onClick={() => navigate('/repairs/new')} variant="outline" className="flex items-center gap-2">
+                <Wrench className="h-4 w-4" />
+                New Repair
               </Button>
             )}
           </div>

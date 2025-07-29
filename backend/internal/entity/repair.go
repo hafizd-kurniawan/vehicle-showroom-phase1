@@ -57,3 +57,10 @@ type AddPartToRepairRequest struct {
 	SparePartID int `json:"spare_part_id" binding:"required"`
 	Quantity    int `json:"quantity" binding:"required,min=1"`
 }
+
+type RepairListResponse struct {
+	Repairs []Repair `json:"repairs"`
+	Total   int      `json:"total"`
+	Page    int      `json:"page"`
+	Limit   int      `json:"limit"`
+}

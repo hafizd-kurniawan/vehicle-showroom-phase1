@@ -39,3 +39,10 @@ type UpdateSparePartRequest struct {
 	UnitMeasure   *string  `json:"unit_measure"`
 	IsActive      *bool    `json:"is_active"`
 }
+
+type SparePartListResponse struct {
+	SpareParts []SparePart `json:"spare_parts"`
+	Total      int         `json:"total"`
+	Page       int         `json:"page"`
+	Limit      int         `json:"limit"`
+}
